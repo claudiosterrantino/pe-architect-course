@@ -44,3 +44,39 @@
     namespace=%k8s.ns.name)
   priority: CRITICAL
   tags: [container, root, security, namespace]
+
+- rule: Suspicious Network Activity
+  desc: Detect unexpected network connections
+  condition: >
+    spawned_process and container and
+    proc.name in (nc, telnet, ncat) and
+    not proc.args contains "allowed_host"
+  output: >
+    Suspicious network tool executed (user=%user.name container=%container.name
+    image=%container.image.repository proc=%proc.cmdline)
+  priority: WARNING
+
+# List of sensitive files
+- list: sensitive_file_names
+  items: [
+    "/etc/shadow",
+    "/etc/passwd"
+  ]
+
+# Macro to intercept file access
+- macro: sensitive_files_access
+  condition: >
+    container and
+    (evt.type in (open, openat, openat2) and evt.is_open_read = true) and
+    fd.name in (sensitive_file_names)
+
+# Rule to intercept suspicious access to sensitive files
+- rule: Suspicious Access Files
+  desc: Detect unexpected access to sensitive files
+  condition: sensitive_files_access
+  output: >
+    Suspicious file access detected (user=%user.name command=%proc.cmdline
+    file=%fd.name container_id=%container.id container_name=%container.name
+    image=%container.image.repository)
+  priority: WARNING
+  tags: [filesystem, security, container]
