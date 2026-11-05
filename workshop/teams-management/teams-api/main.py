@@ -20,6 +20,7 @@ app.add_middleware(
     allow_headers=["*"],  # Allows all headers
 )
 
+# La sintassi definisce un dizionario in memoria chiamato teams_store che viene utilizzato per memorizzare le informazioni sulle squadre (teams) create tramite l'API.
 # In-memory storage
 teams_store: Dict[str, Dict] = {}
 
@@ -27,6 +28,9 @@ teams_store: Dict[str, Dict] = {}
 class TeamCreate(BaseModel):
     name: str
 
+# Questa sintassi viene utilizzata per definire un modello di dati che rappresenta una squadra (team) con un solo attributo, il nome della squadra. 
+# Il modello TeamCreate eredita da BaseModel di Pydantic, che fornisce funzionalità di validazione dei dati e serializzazione. 
+# In questo caso, il modello TeamCreate viene utilizzato per ricevere i dati di input quando si crea una nuova squadra tramite l'API.
 class Team(BaseModel):
     id: str
     name: str
@@ -52,13 +56,18 @@ async def create_team(team: TeamCreate):
         "created_at": datetime.now()
     }
 
+    # Aggiunge il nuovo team al dizionario teams_store utilizzando l'ID univoco generato come chiave. 
+    # In questo modo, il team appena creato viene memorizzato in memoria e può essere recuperato successivamente tramite le API.
     teams_store[team_id] = new_team
     return Team(**new_team)
 
 @app.get("/teams", response_model=List[Team])
 async def get_teams():
     """Get all teams"""
-    return [Team(**team) for team in teams_store.values()]
+    # Avendo definito il response_model come List[Team], FastAPI si aspetta che la funzione restituisca una lista di oggetti Team.
+    # La sintassi list(teams_store.values()) è molto più pulita e converte i valori del dizionario teams_store in una lista, che viene poi restituita come risposta all'endpoint GET /teams.
+    #return [Team(**team) for team in teams_store.values()]
+    return list(teams_store.values())
 
 @app.get("/teams/{team_id}", response_model=Team)
 async def get_team(team_id: str):
@@ -66,7 +75,8 @@ async def get_team(team_id: str):
     if team_id not in teams_store:
         raise HTTPException(status_code=404, detail="Team not found")
 
-    return Team(**teams_store[team_id])
+    #return Team(**teams_store[team_id])
+    return teams_store[team_id]
 
 @app.delete("/teams/{team_id}")
 async def delete_team(team_id: str):
