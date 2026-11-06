@@ -16,6 +16,7 @@ NC='\033[0m' # No Color
 NAMESPACE="engineering-platform"
 UI_IMAGE="teams-ui:latest"
 API_IMAGE="teams-api:latest"
+KIND_CLUSTER_NAME="5min-idp"
 
 # Functions
 log_info() {
