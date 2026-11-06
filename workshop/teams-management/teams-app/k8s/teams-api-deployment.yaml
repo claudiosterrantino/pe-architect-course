@@ -21,6 +21,8 @@ spec:
         app: teams-api
         component: backend
     spec:
+      securityContext:
+        runAsNonRoot: true
       containers:
       - name: teams-api
         # Sostituisco l'immagine (olivercodes01/teams-api:0.0.2) con quella locale per il backend

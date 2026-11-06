@@ -20,6 +20,8 @@ spec:
         app: teams-ui
         component: frontend
     spec:
+      securityContext:
+        runAsNonRoot: true
       containers:
       - name: teams-ui
         # Sostitui l'immagine (olivercodes01/teams-app:0.0.7) con quella locale per il frontend
