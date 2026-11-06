@@ -23,7 +23,7 @@ spec:
       containers:
       - name: teams-ui
         # Sostitui l'immagine (olivercodes01/teams-app:0.0.7) con quella locale per il frontend
-        image: teams-ui:latest
+        image: teams-ui:local
         ports:
         # Modifico la porta del container da 80 a 8080 per container non privilegiato
         - containerPort: 8080

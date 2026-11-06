@@ -24,7 +24,7 @@ spec:
       containers:
       - name: teams-api
         # Sostituisco l'immagine (olivercodes01/teams-api:0.0.2) con quella locale per il backend
-        image: teams-api:latest
+        image: teams-api:local
         ports:
         - containerPort: 8000
         env:

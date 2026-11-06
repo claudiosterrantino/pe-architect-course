@@ -99,6 +99,20 @@ build_images() {
     fi
 
     log_success "Docker images built successfully"
+
+    # --- AGGIUNTA CARICAMENTO SU KIND ---
+    if command -v kind &> /dev/null && kind get clusters | grep -q "^${KIND_CLUSTER_NAME}$"; then
+        log_info "Loading images into Kind cluster '${KIND_CLUSTER_NAME}'..."
+        kind load docker-image $UI_IMAGE --name $KIND_CLUSTER_NAME
+        log_success "Loaded $UI_IMAGE into Kind"
+
+        if [ -f "api.Dockerfile" ]; then
+            kind load docker-image $API_IMAGE --name $KIND_CLUSTER_NAME
+            log_success "Loaded $API_IMAGE into Kind"
+        fi
+    else
+        log_warning "Kind cluster not found or command 'kind' not available, skipping image load."
+    fi
 }
 
 # Deploy to Kubernetes
