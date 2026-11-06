@@ -313,8 +313,8 @@ spec:
           value: keycloak
         - name: KC_DB_PASSWORD
           value: keycloak
-        - name: KC_HOSTNAME
-          value: platform-auth.127.0.0.1.sslip.io
+        #- name: KC_HOSTNAME
+        #  value: platform-auth.127.0.0.1.sslip.io
         - name: KC_HOSTNAME_STRICT
           value: "false"
         - name: KC_HTTP_ENABLED
