@@ -206,13 +206,13 @@ data:
           "enabled": true,
           "clientAuthenticatorType": "client-secret",
           "redirectUris": [
-            "http://platform-auth.127.0.0.1.sslip.io/*",
+            "http://platform-auth.127.0.0.1.sslip.io:8082/*",
             "http://engineering-platform.local/*",
             "http://localhost:4200/*",
             "http://jade-louse-47.coder/*"
           ],
           "webOrigins": [
-            "http://platform-auth.127.0.0.1.sslip.io",
+            "http://platform-auth.127.0.0.1.sslip.io:8082",
             "http://engineering-platform.local",
             "http://localhost:4200",
             "http://jade-louse-47.coder:<port>"
@@ -220,7 +220,7 @@ data:
           "publicClient": true,
           "protocol": "openid-connect",
           "attributes": {
-            "post.logout.redirect.uris": "http://platform-auth.127.0.0.1.sslip.io/*##http://localhost:4200/*##http://jade-louse-47.coder:*"
+            "post.logout.redirect.uris": "http://platform-auth.127.0.0.1.sslip.io:8082/*##http://localhost:4200/*##http://jade-louse-47.coder:*"
           }
         }
       ],
