@@ -22,9 +22,11 @@ spec:
     spec:
       containers:
       - name: teams-ui
-        image: olivercodes01/teams-app:0.0.7
+        # Sostitui l'immagine (olivercodes01/teams-app:0.0.7) con quella locale per il frontend
+        image: teams-ui:latest
         ports:
-        - containerPort: 80
+        # Modifico la porta del container da 80 a 8080 per container non privilegiato
+        - containerPort: 8080
         env:
         - name: API_URL
           value: "http://teams-api-service:4200"
@@ -35,15 +37,16 @@ spec:
           limits:
             memory: "128Mi"
             cpu: "100m"
+        # Modifico le probe per la porta 8080
         livenessProbe:
           httpGet:
             path: /health
-            port: 80
+            port: 8080
           initialDelaySeconds: 30
           periodSeconds: 10
         readinessProbe:
           httpGet:
             path: /health
-            port: 80
+            port: 8080
           initialDelaySeconds: 5
           periodSeconds: 5

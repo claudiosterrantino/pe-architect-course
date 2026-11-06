@@ -7,6 +7,9 @@ metadata:
   labels:
     app: teams-api
     component: backend
+  #Aggiungo l'annotation per il commit SHA
+  annotations:
+    commit-sha: 8b514a1cb354
 spec:
   replicas: 2
   selector:
@@ -20,7 +23,8 @@ spec:
     spec:
       containers:
       - name: teams-api
-        image: olivercodes01/teams-api:0.0.2
+        # Sostituisco l'immagine (olivercodes01/teams-api:0.0.2) con quella locale per il backend
+        image: teams-api:latest
         ports:
         - containerPort: 8000
         env:
