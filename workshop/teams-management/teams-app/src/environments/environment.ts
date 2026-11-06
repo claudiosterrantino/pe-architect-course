@@ -4,7 +4,7 @@ export const environment = {
   apiUrl: "http://teams-api.127.0.0.1.sslip.io",
   keycloak: {
     // same as above, but with keycloak forward port
-    url: "http://platform-auth.127.0.0.1.sslip.io",
+    url: "http://platform-auth.127.0.0.1.sslip.io:8082",
     realm: "teams",
     clientId: "teams-ui",
   },
