@@ -206,12 +206,14 @@ data:
           "enabled": true,
           "clientAuthenticatorType": "client-secret",
           "redirectUris": [
+            "http://teams-ui.127.0.0.1.sslip.io:8080/*",
             "http://platform-auth.127.0.0.1.sslip.io:8082/*",
             "http://engineering-platform.local/*",
             "http://localhost:4200/*",
             "http://jade-louse-47.coder/*"
           ],
           "webOrigins": [
+            "http://teams-ui.127.0.0.1.sslip.io:8080",
             "http://platform-auth.127.0.0.1.sslip.io:8082",
             "http://engineering-platform.local",
             "http://localhost:4200",
