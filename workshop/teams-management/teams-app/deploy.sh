@@ -14,8 +14,8 @@ NC='\033[0m' # No Color
 
 # Configuration
 NAMESPACE="engineering-platform"
-UI_IMAGE="teams-ui:latest"
-API_IMAGE="teams-api:latest"
+UI_IMAGE="teams-ui:local"
+API_IMAGE="teams-api:local"
 KIND_CLUSTER_NAME="5min-idp"
 
 # Functions
@@ -92,9 +92,9 @@ build_images() {
     docker build -t $UI_IMAGE .
 
     # Build API image (assuming API Dockerfile exists)
-    if [ -f "api.Dockerfile" ]; then
+    if [ -f "../teams-api/Dockerfile" ]; then
         log_info "Building API Docker image..."
-        docker build -f api.Dockerfile -t $API_IMAGE .
+        docker build -f ../teams-api/Dockerfile -t $API_IMAGE ../teams-api
     else
         log_warning "API Dockerfile not found. Make sure API image is available"
     fi
