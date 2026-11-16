@@ -1,0 +1,52 @@
+version: "3"
+services:
+  front:
+    image: node:lts
+    ports:
+      - 3000:3000
+    volumes:
+      - ./front:/opt/app:z
+    command:
+      - /bin/bash
+      - -c
+      - |
+        cd /opt/app
+        npm install
+        npm start
+  back:
+    image: node:lts
+    environment:
+      - PORT=3003
+      - DB_PASSWORD=shorties
+      - DB_USER=shorties
+      - DB_SERVER=shorties
+    depends_on: 
+      - shorties
+    ports:
+      - 8888:3003
+    volumes:
+      - ./back:/opt/app:z
+    command: 
+      - /bin/bash
+      - -c
+      - |
+        cd /opt/app
+        npm install
+        npx nodemon ./bin/www
+  redirector:
+    build: ./redirector
+    environment:
+      - POSTGRES_USER=shorties
+      - POSTGRES_PASSWORD=shorties
+      - POSTGRES_SERVER=shorties
+    ports: 
+      - 8080:8080
+    depends_on: 
+      - shorties
+  shorties:
+    image: postgres:17
+    restart: always
+    environment:
+      POSTGRES_USER: shorties
+      POSTGRES_PASSWORD: shorties
+      POSTGRES_DB: urls
