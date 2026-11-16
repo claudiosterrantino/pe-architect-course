@@ -15,6 +15,9 @@ spec:
       labels:
         app: vulnerable-app
     spec:
+      securityContext:
+        runAsUser: 1000
+        runAsNonRoot: true
       containers:
       - name: web
         image: httpd:2.4  # 2 critical CVEs

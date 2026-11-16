@@ -45,6 +45,7 @@
   priority: CRITICAL
   tags: [container, root, security, namespace]
 
+# CAPSTONE CUSTOM RULES
 - rule: Suspicious Network Activity
   desc: Detect unexpected network connections
   condition: >

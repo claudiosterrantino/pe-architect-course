@@ -47,6 +47,19 @@ sudo ln -s $(pwd)/teams_cli.py /usr/local/bin/teams-cli
 # Verify
 teams-cli --help
 ```
+> TODO: DA REVISIONARE 
+> ## Installation
+> ### Creare un binario autonomo con **PyInstaller**
+> 
+> È l'approccio standard per compilare uno script Python e tutte le sue > librerie (come `requests`) all'interno di un unico binario nativo, senza richiedere che l'utente finale abbia Python installato sulla macchina:
+> 
+> - Installa PyInstaller: `pip install pyinstaller`
+> 
+> - Compila in un singolo eseguibile standalone: `pyinstaller --onefile teams_cli.py`
+> 
+> 
+> Il binario compilato viene generato all'interno della cartella `dist/` con il nome `dist/teams_cli` (o `dist/> teams_cli.exe` su Windows).
+> - Copiare il binario nel $PATH Linux per gli utenti: `sudo cp dist/teams_cli /usr/local/bin/teams-cli`
 
 ## Usage
 
