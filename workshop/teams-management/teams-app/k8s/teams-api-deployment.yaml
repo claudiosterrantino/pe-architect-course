@@ -11,7 +11,8 @@ metadata:
   annotations:
     commit-sha: 8b514a1cb354
 spec:
-  replicas: 2
+  # The API stores teams in process memory; multiple replicas would have inconsistent data.
+  replicas: 1
   selector:
     matchLabels:
       app: teams-api
