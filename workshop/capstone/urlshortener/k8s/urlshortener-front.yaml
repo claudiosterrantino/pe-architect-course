@@ -19,6 +19,7 @@ spec:
         app.kubernetes.io/name: urlshortener-front
       annotations:
         # Annotazione di provenance per conformità a Gatekeeper
+        # TODO: commit-sha
         commit: "a1b2c3d4e5f6"
     spec:
       containers:
@@ -29,8 +30,14 @@ spec:
               name: http
           env:
             # Configurazione opzionale se colleghi un backend URL shortener
-            - name: BACKEND_URL
-              value: "http://urlshortener-backend:8080"
+            - name: BASE_URL
+              value: "http://localhost:8081"
+            - name: REDIRECTOR_URL
+              value: "http://localhost:8082"
+            - name: HOSTNAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
           resources:
             limits:
               cpu: "150m"

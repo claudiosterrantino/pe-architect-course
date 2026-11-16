@@ -1,0 +1,86 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: urlshortener-backend
+  labels:
+    app: urlshortener-backend
+    app.kubernetes.io/name: urlshortener-backend
+    app.kubernetes.io/component: backend
+    app.kubernetes.io/part-of: urlshortener-suite
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: urlshortener-backend
+  template:
+    metadata:
+      labels:
+        app: urlshortener-backend
+        app.kubernetes.io/name: urlshortener-backend
+      annotations:
+        # Annotazione di provenance per conformità a Gatekeeper
+        commit: "a1b2c3d4e5f6"
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1001
+        runAsGroup: 1001
+        fsGroup: 1001
+      containers:
+        - name: backend
+          image: urlshortener-back:local
+          ports:
+            - containerPort: 8080
+              name: http
+          env:
+            - name: PORT
+              value: "8080"
+            - name: DB_SERVER
+              value: "postgres-service"
+            - name: DB_PORT
+              value: "5432"
+            - name: DB_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-credentials
+                  key: POSTGRES_DB
+            - name: DB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-credentials
+                  key: POSTGRES_USER
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-credentials
+                  key: POSTGRES_PASSWORD
+          resources:
+            limits:
+              cpu: "200m"
+              memory: "150Mi"
+            requests:
+              cpu: "50m"
+              memory: "64Mi"
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: false
+            capabilities:
+              drop:
+                - ALL
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: urlshortener-backend
+  labels:
+    app: urlshortener-backend
+    app.kubernetes.io/name: urlshortener-backend
+    app.kubernetes.io/component: backend
+spec:
+  type: ClusterIP
+  ports:
+    - port: 8080
+      targetPort: 8080
+      name: http
+  selector:
+    app: urlshortener-backend

@@ -5,7 +5,9 @@ do
 #!  cat $file | envsubst $EXISTING_VARS | tee $file
   sed -i "s|\$BASE_URL|${BASE_URL}|g" $file
   sed -i "s|\$REDIRECTOR_URL|${REDIRECTOR_URL}|g" $file
+  sed -i "s|\$HOSTNAME|${HOSTNAME}|g" $file
   sed -i "s|Config.BASE_URL|${BASE_URL}|g" $file
   sed -i "s|Config.REDIRECTOR_URL|${REDIRECTOR_URL}|g" $file
+  sed -i "s|Config.HOSTNAME|${HOSTNAME}|g" $file
 done
 nginx -g 'daemon off;'

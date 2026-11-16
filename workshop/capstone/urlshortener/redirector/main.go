@@ -50,7 +50,7 @@ func main() {
 }
 
 func getURL(routeId string) string {
-	connStr := "user=shorties password=shorties dbname=urls host=" + os.Getenv("POSTGRES_SERVER") + " sslmode=disable"
+	connStr := "user=dbuser password=SecurePassword123! dbname=urls host=" + os.Getenv("POSTGRES_SERVER") + " sslmode=disable"
 	db, err := sql.Open("postgres", connStr)
 	if err != nil {
 		log.Fatal(err)

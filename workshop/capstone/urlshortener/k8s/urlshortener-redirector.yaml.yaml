@@ -1,0 +1,73 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: urlshortener-redirector
+  labels:
+    app: urlshortener-redirector
+    app.kubernetes.io/name: urlshortener-redirector
+    app.kubernetes.io/component: redirector
+    app.kubernetes.io/part-of: urlshortener-suite
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: urlshortener-redirector
+  template:
+    metadata:
+      labels:
+        app: urlshortener-redirector
+        app.kubernetes.io/name: urlshortener-redirector
+      annotations:
+        commit: "d4e5f6a1b2c3"
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1001
+        runAsGroup: 1001
+        fsGroup: 1001
+      containers:
+        - name: redirector
+          image: urlshortener-redirector:local
+          ports:
+            - containerPort: 8080
+              name: http
+          env:
+            # Il codice Go legge POSTGRES_SERVER; DB, utente e password sono hardcoded.
+            - name: POSTGRES_SERVER
+              value: "postgres-service"
+          resources:
+            limits:
+              cpu: "150m"
+              memory: "128Mi"
+            requests:
+              cpu: "50m"
+              memory: "64Mi"
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: false
+            capabilities:
+              drop:
+                - ALL
+          volumeMounts:
+            - name: tmp-dir
+              mountPath: /tmp
+      volumes:
+        - name: tmp-dir
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: urlshortener-redirector
+  labels:
+    app: urlshortener-redirector
+    app.kubernetes.io/name: urlshortener-redirector
+    app.kubernetes.io/component: redirector
+spec:
+  type: ClusterIP
+  ports:
+    - port: 8080
+      targetPort: 8080
+      name: http
+  selector:
+    app: urlshortener-redirector
