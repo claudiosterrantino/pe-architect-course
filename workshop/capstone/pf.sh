@@ -3,7 +3,7 @@
 URLSHORTENER_NS="team-urlshortener"
 KEYCLOAK_NS=keycloak
 MONITORING_NS=monitoring
-PLATFORM_NS=platform-engineering
+PLATFORM_NS=engineering-platform
 
 case "$1" in
   start)
