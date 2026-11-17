@@ -35,7 +35,7 @@ spec:
           env:
             # Il codice Go legge POSTGRES_SERVER; DB, utente e password sono hardcoded.
             - name: POSTGRES_SERVER
-              value: "postgres-service"
+              value: "postgres-urlshortener-service"
           resources:
             limits:
               cpu: "150m"
