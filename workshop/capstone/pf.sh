@@ -12,7 +12,7 @@ case "$1" in
         kubectl port-forward -n $KEYCLOAK_NS svc/keycloak-service 8082:8080 >/dev/null 2>&1 &
         kubectl port-forward -n $PLATFORM_NS svc/teams-ui-service 8080:8080 >/dev/null 2>&1 &
         kubectl port-forward -n $PLATFORM_NS svc/teams-api-service 4200:4200 >/dev/null 2>&1 &
-        kubectl port-forward -n $MONITORING svc/grafana-stack 3000:80 >/dev/null 2>&1 &
+        kubectl port-forward -n $MONITORING_NS svc/grafana-stack 3000:80 >/dev/null 2>&1 &
         echo "Platform avviata (8082, 8080, 4200, 3000)"
         ;;
       urlshortener)

@@ -22,29 +22,31 @@ export default class About extends React.Component {
     Api.getServerStatus()
       .then(status => {
         if (status) {
-          this.setState({status})
+          this.setState(state => ({
+            status: { ...state.status, ...status }
+          }));
         }
       })
       .catch(e => {
         console.log(e);
-        this.setState({status: {server: false, database: false}})
+        this.setState(state => ({
+          status: { ...state.status, server: false, database: false }
+        }));
       });
     console.log(`getting redirector status from ${Config.REDIRECTOR_URL}`);
     
     fetch(`${Config.REDIRECTOR_URL}/health`)
       .then(resp => resp.json())
       .then(_ => {
-        this.setState((state) => {
-          state.status.redirector = true;
-          return state;
-        })
+        this.setState(state => ({
+          status: { ...state.status, redirector: true }
+        }));
       })
       .catch(e => {
         console.log(e);
-        this.setState(state => {
-          state.status.redirector = false;
-          return state;
-        });
+        this.setState(state => ({
+          status: { ...state.status, redirector: false }
+        }));
       });
   }
 

@@ -1,0 +1,337 @@
+---
+# 1. Credenziali del Database
+apiVersion: v1
+kind: Secret
+metadata:
+  name: postgres-urlshortener-credentials
+  namespace: team-urlshortener
+  labels:
+    app: postgres
+    app.kubernetes.io/name: postgres-urlshortener-credentials
+    app.kubernetes.io/component: database
+    app.kubernetes.io/part-of: urlshortener-suite
+type: Opaque
+stringData:
+  POSTGRES_DB: urls
+  POSTGRES_USER: dbuser
+  POSTGRES_PASSWORD: SecurePassword123!
+  PGDATA: /var/lib/postgresql/data/pgdata
+---
+# 2. Deployment PostgreSQL
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgres-urlshortener-db
+  namespace: team-urlshortener
+  labels:
+    app: postgres
+    app.kubernetes.io/name: postgres-urlshortener-db
+    app.kubernetes.io/component: database
+    app.kubernetes.io/part-of: urlshortener-suite
+  annotations:
+      commit-sha: "c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0a1b2"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres
+  template:
+    metadata:
+      labels:
+        app: postgres
+        app.kubernetes.io/name: postgres
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 999
+        runAsGroup: 999
+        fsGroup: 999
+      containers:
+        - name: postgres
+          image: postgres:15-alpine
+          ports:
+            - containerPort: 5432
+              name: postgres
+          envFrom:
+            - secretRef:
+                name: postgres-urlshortener-credentials
+          resources:
+            limits:
+              cpu: "200m"
+              memory: "128Mi"
+            requests:
+              cpu: "50m"
+              memory: "64Mi"
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: false
+            capabilities:
+              drop:
+                - ALL
+          volumeMounts:
+            - name: pgdata
+              mountPath: /var/lib/postgresql/data
+      volumes:
+        - name: pgdata
+          emptyDir: {}
+---
+# 3. Service di Rete Interno
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres-urlshortener-service
+  namespace: team-urlshortener
+  labels:
+    app: postgres
+    app.kubernetes.io/name: postgres-urlshortener-service
+    app.kubernetes.io/component: database
+    app.kubernetes.io/part-of: urlshortener-suite
+spec:
+  type: ClusterIP
+  ports:
+    - port: 5432
+      targetPort: 5432
+      name: postgres
+  selector:
+    app: postgres
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: urlshortener-backend
+  namespace: team-urlshortener
+  labels:
+    app: urlshortener-backend
+    app.kubernetes.io/name: urlshortener-backend
+    app.kubernetes.io/component: backend
+    app.kubernetes.io/part-of: urlshortener-suite
+  annotations:
+      commit-sha: "c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0a1b2"
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: urlshortener-backend
+  template:
+    metadata:
+      labels:
+        app: urlshortener-backend
+        app.kubernetes.io/name: urlshortener-backend
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1001
+        runAsGroup: 1001
+        fsGroup: 1001
+      containers:
+        - name: backend
+          image: urlshortener-back:local
+          ports:
+            - containerPort: 8080
+              name: http
+          env:
+            - name: PORT
+              value: "8080"
+            - name: DB_SERVER
+              value: "postgres-urlshortener-service"
+            - name: DB_PORT
+              value: "5432"
+            - name: DB_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-urlshortener-credentials
+                  key: POSTGRES_DB
+            - name: DB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-urlshortener-credentials
+                  key: POSTGRES_USER
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-urlshortener-credentials
+                  key: POSTGRES_PASSWORD
+          resources:
+            limits:
+              cpu: "200m"
+              memory: "150Mi"
+            requests:
+              cpu: "50m"
+              memory: "64Mi"
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: false
+            capabilities:
+              drop:
+                - ALL
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: urlshortener-backend
+  namespace: team-urlshortener
+  labels:
+    app: urlshortener-backend
+    app.kubernetes.io/name: urlshortener-backend
+    app.kubernetes.io/component: backend
+spec:
+  type: ClusterIP
+  ports:
+    - port: 8080
+      targetPort: 8080
+      name: http
+  selector:
+    app: urlshortener-backend
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: urlshortener-redirector
+  namespace: team-urlshortener
+  labels:
+    app: urlshortener-redirector
+    app.kubernetes.io/name: urlshortener-redirector
+    app.kubernetes.io/component: redirector
+    app.kubernetes.io/part-of: urlshortener-suite
+  annotations:
+      commit-sha: "c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0a1b2"
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: urlshortener-redirector
+  template:
+    metadata:
+      labels:
+        app: urlshortener-redirector
+        app.kubernetes.io/name: urlshortener-redirector
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1001
+        runAsGroup: 1001
+        fsGroup: 1001
+      containers:
+        - name: redirector
+          image: urlshortener-redirector:local
+          ports:
+            - containerPort: 8080
+              name: http
+          env:
+            # Il codice Go legge POSTGRES_SERVER; DB, utente e password sono hardcoded.
+            - name: POSTGRES_SERVER
+              value: "postgres-service"
+          resources:
+            limits:
+              cpu: "150m"
+              memory: "128Mi"
+            requests:
+              cpu: "50m"
+              memory: "64Mi"
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: false
+            capabilities:
+              drop:
+                - ALL
+          volumeMounts:
+            - name: tmp-dir
+              mountPath: /tmp
+      volumes:
+        - name: tmp-dir
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: urlshortener-redirector
+  namespace: team-urlshortener
+  labels:
+    app: urlshortener-redirector
+    app.kubernetes.io/name: urlshortener-redirector
+    app.kubernetes.io/component: redirector
+spec:
+  type: ClusterIP
+  ports:
+    - port: 8080
+      targetPort: 8080
+      name: http
+  selector:
+    app: urlshortener-redirector
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: urlshortener-front
+  namespace: team-urlshortener
+  labels:
+    app: urlshortener-front
+    app.kubernetes.io/name: urlshortener-front
+    app.kubernetes.io/component: frontend
+    app.kubernetes.io/part-of: urlshortener-suite
+  annotations:
+      commit-sha: "c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0a1b2"
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: urlshortener-front
+  template:
+    metadata:
+      labels:
+        app: urlshortener-front
+        app.kubernetes.io/name: urlshortener-front
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 101
+        runAsGroup: 101
+        fsGroup: 101
+      containers:
+        - name: front
+          image: urlshortener-front:local
+          ports:
+            - containerPort: 8080
+              name: http
+          env:
+            # Configurazione opzionale se colleghi un backend URL shortener
+            - name: BASE_URL
+              value: "http://urlshortener-back.127.0.0.1.sslip.io:8088"
+            - name: REDIRECTOR_URL
+              value: "http://urlshortener-redirector.127.0.0.1.sslip.io:8090"
+            - name: HOSTNAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+          resources:
+            limits:
+              cpu: "150m"
+              memory: "128Mi"
+            requests:
+              cpu: "50m"
+              memory: "64Mi"
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: false
+            capabilities:
+              drop:
+                - ALL
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: urlshortener-front-svc
+  namespace: team-urlshortener
+  labels:
+    app: urlshortener-front
+    app.kubernetes.io/name: urlshortener-front
+    app.kubernetes.io/component: frontend
+spec:
+  type: ClusterIP
+  ports:
+    - port: 8080
+      targetPort: 8080
+      name: http
+  selector:
+    app: urlshortener-front
+---
